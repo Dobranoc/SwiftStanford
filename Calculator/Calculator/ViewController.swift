@@ -17,6 +17,11 @@ class ViewController: UIViewController
     //  What the next line does is Clear out the 0 when the user types out a number.  So it shows up as "56" instead of 056".  So we create a variable with that long Name and set its type: Bool, and give it a value.  If it's not given a value you will get an error as EVERY property must have a value, even if its "false" or "nil" or whatever.
     var userIsInTheMiddleOfTypingANumber: Bool = false
 
+   
+   
+            
+    
+    
     @IBAction func appendDigit(sender: UIButton) {
         
         //  declare a Local Variable named "digit", "sender" means I'm sending an action to this button.  What action?  The "currentTitle" action.  Which I can see exactly what that is if I CMD-click and open the documentation and see exactly what that does.  "digit" is an optional.  You can tell that by CMD-Clicking on "digit" and it will tell you.  This is an optional that can be a String.  The EXCLAMATION POINT is "unwrapping" the optional to show/use/display the String, or crashes of the value is nil.
@@ -24,14 +29,28 @@ class ViewController: UIViewController
         
         //  The if/else statement below is saying:  IF the User is typing a number perform the first action, which is to simply add the number they just typed "digit" to the number already in the display "display.text!".
         if userIsInTheMiddleOfTypingANumber {
-        //  To actually Display the button being pressed in the Calculator you use the "display.text" property of the UILabel.  Now what Value do I set the Optional (display.text) to (=)?  The value should be the String "display.text + digit".  "digit" being the Variable we've been moving around in this Method.  The Explamation must be used here because it must be displayed as a "String" and that turns the "display.text" into an Optional-String.
-        display.text = display.text! + digit
+            if !(digit == "." && display.text!.rangeOfString(".") != nil) {
+                //  To actually Display the button being pressed in the Calculator you use the "display.text" property of the UILabel.  Now what Value do I set the Optional (display.text) to (=)?  The value should be the String "display.text + digit".  "digit" being the Variable we've been moving around in this Method.  The Explamation must be used here because it must be displayed as a "String" and that turns the "display.text" into an Optional-String.
+                display.text = display.text! + digit
+            }
+        
         } else {
         //  This next line of code is used (else) the user WAS NOT in the middle of typing a number.  So it simply "enters" the number the user clicked, it does not add it to the end of the numbers that are already in the display, it clears them.
             display.text = digit
             userIsInTheMiddleOfTypingANumber = true
         }
     }
+    
+    @IBAction func displayAndEnterConstant(sender: UIButton) {  //  Attaching π button to Action Method.
+        let constant = sender.currentTitle!  //  Creates a Constant named "constant" and asigns it to the value on the display, π.
+        if userIsInTheMiddleOfTypingANumber {  //  Presses "enter" for the user.
+            enter()
+        }
+        display.text = "\(calculatorConstants[constant]!)"  //  Pulls the number from the Display which is now "constant" and multiplies it by the "calculatorConstant" that we created below.
+        enter()
+        userIsInTheMiddleOfTypingANumber = false
+    }
+    
     
     @IBAction func operate(sender: UIButton) {
         let operation = sender.currentTitle!
@@ -44,7 +63,10 @@ class ViewController: UIViewController
             case "+": performOperation { $0 + $1 }
             case "−": performOperation { $1 - $0 }
             case "√": performOperation { sqrt($0)}
+            case "sin": performOperation { sin($0)}
+            case "cos": performOperation { cos($0)}
             
+        
         default:break  //  This tells the code, "if it's not one of these "cases" listed above, stop looking.
         }
     }
@@ -84,7 +106,12 @@ class ViewController: UIViewController
             userIsInTheMiddleOfTypingANumber = false
             
         }
+        
+        
     }
+    var calculatorConstants = [  //  Creates a "constants" array that we can add to later, right now it's just π.
+        "π": M_PI
+    ]
     
 }
 
