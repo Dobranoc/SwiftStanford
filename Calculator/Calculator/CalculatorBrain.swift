@@ -6,6 +6,8 @@
 //  Copyright © 2016 Bryan Brem. All rights reserved.
 //
 
+//  55:00 in to Course 3
+
 import Foundation
 
 class CalculatorBrain
@@ -38,9 +40,14 @@ class CalculatorBrain
             case .Operand(let operand):
                 return (operand, remainingOps)
             case .UnaryOperation(_, let operation):
-                let operandEvaluation = evaluate(remainingOps)
-                if let operand = operandEvaluation.result {
-                return (operation(operand), operandEvaluation.remainOps)
+                let op1Evaluation = evaluate(remainingOps)
+                if let operand1 = op1Evaluation.result {
+                    let op2Evaluation = evaluate(op1Evaluation.remainingOps)
+                    if let operand2 = op2Evaluation.result {
+                        return (operation(operand1, operand2), op2Evaluation.remainingOps)
+                        
+                    }
+                }
             }
                 //  TODO: case.BinaryOperation
         }
@@ -48,7 +55,9 @@ class CalculatorBrain
     }
     
     func evaluate() -> Double? {
-        let (result, remainder) = evaluate(opStack)
+        let (result, _) = evaluate(opStack)
+        return result
+    
     }
     
     func pushOperand(operand: Double) {
