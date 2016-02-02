@@ -44,8 +44,8 @@ class CalculatorBrain
         knownOps["+"] = Op.BinaryOperation("+", +)
         knownOps["−"] = Op.BinaryOperation("−", { $1 - $0})
         knownOps["√"] = Op.UnaryOperation("√", sqrt)
-        //case "sin": performOperation { sin($0) }
-        //case "cos": performOperation { cos($0) }
+        knownOps["sin"] = Op.UnaryOperation("sin", sin)
+        knownOps["cos"] = Op.UnaryOperation("cos", cos)
     }
     // Recursive: Continuesly pulls ops off the stack and puts them in a sequence that makes sense.  ie... a stack of *, 4, +, 5, 6 would end up being 4 * (5 + 6) = 44
     private func evaluate(ops: [Op]) -> (result: Double?, remainingOps: [Op]) //  Syntas to creat and name a toople.
