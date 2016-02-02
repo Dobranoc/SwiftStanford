@@ -2,102 +2,123 @@
 //  ViewController.swift
 //  Calculator
 //
-//  Created by Bryan Brem on 1/25/16.
+//  Created by Bryan Brem on 1/31/16.
 //  Copyright © 2016 Bryan Brem. All rights reserved.
 //
 
-// Merry Christmas
+//  TODO:
+
+
 
 import UIKit
 
 class ViewController: UIViewController {
-    // outlets
+
+    // Variables
     @IBOutlet weak var display: UILabel!
+    @IBOutlet weak var historyDisplay: UILabel!
     
-    // variables
-    var userIsInTheMiddleOfTypingANumber: Bool = false
-    var operandStack = Array<Double>()
+    var brain = CalculatorBrain()
+    
+    var UserIsInTheMiddleOfTypingANumber = false
     var calculatorConstants = [
-        "π": M_PI
-    ]
+        "π": M_PI]
+    var operandStack = Array<Double>()  // delete?
     
-    // add digits
+    //  Apend
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         
-        //  Enable only one "."
-        if userIsInTheMiddleOfTypingANumber {
-            if !(digit == "." && display.text!.rangeOfString(".") != nil) {
-                display.text = display.text! + digit
-            }
-        }
-        else {
+        // Display digit if it's a number or the first "."
+        if UserIsInTheMiddleOfTypingANumber && digit != "."  || (digit == "." && display.text!.rangeOfString(".") == nil) {
+            display.text = display.text! + digit
+        } else {
             display.text = digit
-            userIsInTheMiddleOfTypingANumber = true
+            UserIsInTheMiddleOfTypingANumber = true
+        }
+        appendHistory(digit)
+    }
+    //  Clear Button
+    @IBAction func clear(sender: UIButton) {
+        operandStack.removeAll()
+        operandStack.removeAll()
+        display.text = "0"
+        displayValue = 0
+        enter()
+    }
+    
+    //  Operations
+    @IBAction func operate(sender: UIButton) {
+        if UserIsInTheMiddleOfTypingANumber {
+            enter()
+        }
+        if let operation = sender.currentTitle {
+            if let result = brain.performOperation(operation) {
+            displayValue = result
+        } else {
+            displayValue = 0
+        }
+        
+        }
+        appendHistory(operation)
+    }
+    
+    //  Operations Returns
+    func performOperation(operation: (Double, Double) -> Double) {
+        if operandStack.count >= 2 {
+            displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
+            enter()
         }
     }
     
-    //  enable π
+    //  Operations Returns
+    private func performOperation(operation: Double -> Double) {
+        if operandStack.count >= 1 {
+            displayValue = operation(operandStack.removeLast())
+            enter()
+            }
+
+        }
+    
+    //  Using Constants
     @IBAction func displayAndEnterConstant(sender: UIButton) {
         let constant = sender.currentTitle!
-        if userIsInTheMiddleOfTypingANumber {
+        if UserIsInTheMiddleOfTypingANumber {
             enter()
         }
         display.text = "\(calculatorConstants[constant]!)"
         enter()
-        userIsInTheMiddleOfTypingANumber = false
+        UserIsInTheMiddleOfTypingANumber = false
     }
     
-    //  enable Operations
-    @IBAction func operate(sender: UIButton) {
-        let operation = sender.currentTitle!
-        if userIsInTheMiddleOfTypingANumber {
-            enter()
-        }
-        switch operation {
-            case "×": performOperation { $0 * $1 }
-            case "÷": performOperation { $1 / $0 }
-            case "+": performOperation { $0 + $1 }
-            case "−": performOperation { $1 - $0 }
-            case "√": performOperation { sqrt($0)}
-            case "sin": performOperation { sin($0)}
-            case "cos": performOperation { cos($0)}
-            
-        default:break
-        }
-    }
-    
-    func performOperation(operation: (Double, Double) -> Double) {
-        if operandStack.count >= 2 {
-        displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
-        enter()
-        }
-    }
-    
-    @nonobjc func performOperation(operation: Double -> Double) {
-        if operandStack.count >= 1 {
-            displayValue = operation(operandStack.removeLast())
-            enter()
-        }
-    }
-    
-    //  enable Enter
+    //  Enter
     @IBAction func enter() {
-        userIsInTheMiddleOfTypingANumber = false
-        operandStack.append(displayValue)
-        print("operandStack = \(operandStack)")
+        UserIsInTheMiddleOfTypingANumber = false
+        if let result = brain.pushOperand(displayValue) {
+            displayValue = result
+        }   else {
+            displayValue = 0
+        }
     }
     
+    //  Display
     var displayValue: Double {
-        get{
+        get {
             return NSNumberFormatter().numberFromString(display.text!)!.doubleValue
         }
-        set{
+        set {
             display.text = "\(newValue)"
-            userIsInTheMiddleOfTypingANumber = false
+            UserIsInTheMiddleOfTypingANumber = false
         }
     }
     
     
+    func appendHistory(operandOrOperator: String) {
+        if historyDisplay.text != nil {
+            historyDisplay.text = historyDisplay.text! + operandOrOperator
+        } else {
+            historyDisplay.text = operandOrOperator
+        }
+    }
 }
 
